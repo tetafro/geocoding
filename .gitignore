@@ -1,0 +1,11 @@
+# Go vendored packages
+/vendor/
+
+# Compiled binaries
+/bin/
+
+# Current config
+config.env
+
+# Database dumps
+*.tsv

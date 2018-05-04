@@ -42,7 +42,13 @@ func (r *PostgresRepo) GetByName(name string) ([]*Place, error) {
 	places := []*Place{}
 	for rows.Next() {
 		p := &Place{}
-		if err = rows.Scan(&p.Name); err != nil {
+		err = rows.Scan(
+			&p.ID, &p.Name, &p.AlternativeNames, &p.OSMType, &p.OSMID, &p.Class, &p.Type,
+			&p.Lon, &p.Lat, &p.PlaceRank, &p.Importance, &p.Street, &p.City, &p.County, &p.State,
+			&p.Country, &p.CountryCode, &p.DisplayName, &p.West, &p.South, &p.East, &p.North,
+			&p.Wikidata, &p.Wikipedia, &p.Housenumbers,
+		)
+		if err != nil {
 			return nil, fmt.Errorf("failed scan rows: %v", err)
 		}
 		places = append(places, p)
@@ -57,9 +63,12 @@ func prepareStmt(db *sql.DB) (*placeStmts, error) {
 	var err error
 
 	stmts.selectByName, err = db.Prepare(`
-		SELECT display_name
+		SELECT id, name, alternative_names, osm_type, osm_id, class, type,
+			lon, lat, place_rank, importance, street, city, county, state,
+			country, country_code, display_name, west, south, east, north,
+			wikidata, wikipedia, housenumbers
 		FROM place
-		WHERE tsv @@ to_tsquery($1)
+		WHERE city = 'Краснодар' AND tsv @@ to_tsquery($1)
 		ORDER BY place_rank, importance
 		LIMIT 10
 	`)

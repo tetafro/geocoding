@@ -24,10 +24,10 @@ CREATE TABLE place
     north             DOUBLE PRECISION,
     wikidata          VARCHAR,
     wikipedia         VARCHAR,
-    housenumbers      VARCHAR
-    tsv               tsvector;
+    housenumbers      VARCHAR,
+    tsv               tsvector
 );
-CREATE INDEX tsv_idx ON place USING gin(tsv);
+CREATE INDEX place_tsv_idx ON place USING gin(tsv);
 
 CREATE TABLE address
 (
@@ -37,7 +37,7 @@ CREATE TABLE address
     street      VARCHAR,
     housenumber VARCHAR,
     lon         DOUBLE PRECISION,
-    lat         DOUBLE PRECISION
-    tsv         tsvector;
+    lat         DOUBLE PRECISION,
+    tsv         tsvector
 );
-CREATE INDEX tsv_idx ON address USING gin(tsv);
+CREATE INDEX address_tsv_idx ON address USING gin(tsv);

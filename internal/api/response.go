@@ -6,11 +6,16 @@ import (
 	"net/http"
 )
 
+// Response is a generic JSON response structure.
+type Response struct {
+	Data interface{} `json:"data"`
+}
+
 // Respond writes a generic JSON response.
 func Respond(w http.ResponseWriter, code int, msg interface{}) {
 	resp := "{}"
 	if msg != nil {
-		b, err := json.Marshal(msg)
+		b, err := json.Marshal(Response{Data: msg})
 		if err != nil {
 			code = http.StatusInternalServerError
 			resp = fmt.Sprintf(`{"error": "%s"}`, http.StatusText(code))

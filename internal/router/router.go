@@ -11,12 +11,23 @@ import (
 // New creates main HTTP handler for the app.
 func New(p *places.Controller) http.Handler {
 	r := chi.NewRouter()
-	r.Get("/healthz", Healthz)
-	r.Get("/api/places", p.Get)
+	r.Get("/", home)
+	r.Get("/healthz", healthz)
+	r.Get("/api/v1/places", p.Get)
+
+	// Static
+	fs := http.StripPrefix("/static/", http.FileServer(http.Dir("static")))
+	r.Get("/static/*", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		fs.ServeHTTP(w, r)
+	}))
+
 	return r
 }
 
-// Healthz simply gives a 200 reply.
-func Healthz(w http.ResponseWriter, r *http.Request) {
+func healthz(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Ok"))
+}
+
+func home(w http.ResponseWriter, r *http.Request) {
+	http.ServeFile(w, r, "templates/index.html")
 }

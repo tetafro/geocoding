@@ -3,6 +3,7 @@ package places
 import (
 	"database/sql"
 	"fmt"
+	"strings"
 )
 
 // Repo deals with places repository.
@@ -31,6 +32,7 @@ func NewPostgresRepo(db *sql.DB) (*PostgresRepo, error) {
 
 // GetByName find places by name (or by part of name).
 func (r *PostgresRepo) GetByName(name string) ([]*Place, error) {
+	name = searchable(name)
 	rows, err := r.stmt.selectByName.Query(name)
 	if err != nil {
 		return nil, fmt.Errorf("failed to make request: %v", err)
@@ -49,6 +51,7 @@ func (r *PostgresRepo) GetByName(name string) ([]*Place, error) {
 	return places, nil
 }
 
+// prepareStmt prepares all statements.
 func prepareStmt(db *sql.DB) (*placeStmts, error) {
 	stmts := &placeStmts{}
 	var err error
@@ -56,7 +59,7 @@ func prepareStmt(db *sql.DB) (*placeStmts, error) {
 	stmts.selectByName, err = db.Prepare(`
 		SELECT display_name
 		FROM place
-		WHERE tsv @@ plainto_tsquery($1)
+		WHERE tsv @@ to_tsquery($1)
 		ORDER BY place_rank, importance
 		LIMIT 10
 	`)
@@ -65,4 +68,14 @@ func prepareStmt(db *sql.DB) (*placeStmts, error) {
 	}
 
 	return stmts, nil
+}
+
+// searchable prepares string for using in Posgres full-text search.
+func searchable(s string) string {
+	s = strings.TrimSpace(s)
+	if s == "" {
+		return ""
+	}
+	words := strings.Fields(s)
+	return strings.Join(words, ":* & ") + ":*"
 }

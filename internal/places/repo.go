@@ -41,15 +41,10 @@ func (r *PostgresRepo) GetByName(name string) ([]*Place, error) {
 
 	places := []*Place{}
 	for rows.Next() {
-		p := &Place{}
-		err = rows.Scan(
-			&p.ID, &p.Name, &p.AlternativeNames, &p.OSMType, &p.OSMID, &p.Class, &p.Type,
-			&p.Lon, &p.Lat, &p.PlaceRank, &p.Importance, &p.Street, &p.City, &p.County, &p.State,
-			&p.Country, &p.CountryCode, &p.DisplayName, &p.West, &p.South, &p.East, &p.North,
-			&p.Wikidata, &p.Wikipedia, &p.Housenumbers,
-		)
+		p := &Place{Coordinate: &Point{}}
+		err = rows.Scan(&p.ID, &p.OSMID, &p.OSMType, &p.Name, &p.Coordinate.Lat, &p.Coordinate.Lon)
 		if err != nil {
-			return nil, fmt.Errorf("failed scan rows: %v", err)
+			return nil, fmt.Errorf("failed to scan rows: %v", err)
 		}
 		places = append(places, p)
 	}
@@ -63,13 +58,9 @@ func prepareStmt(db *sql.DB) (*placeStmts, error) {
 	var err error
 
 	stmts.selectByName, err = db.Prepare(`
-		SELECT id, name, alternative_names, osm_type, osm_id, class, type,
-			lon, lat, place_rank, importance, street, city, county, state,
-			country, country_code, display_name, west, south, east, north,
-			wikidata, wikipedia, housenumbers
+		SELECT id, osm_id, osm_type, name, coordinate[0], coordinate[1]
 		FROM place
-		WHERE city = 'Краснодар' AND tsv @@ to_tsquery($1)
-		ORDER BY place_rank, importance
+		WHERE tsv @@ to_tsquery($1)
 		LIMIT 10
 	`)
 	if err != nil {

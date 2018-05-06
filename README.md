@@ -2,45 +2,49 @@
 
 Search addresses and places.
 
-## Prepare data
-
-Use [OSMNames](https://github.com/OSMNames/OSMNames) project to extract data
-from [OpenStreetMaps](https://www.openstreetmap.org/). Fix name field in
-mapping if you want to use another language
-```sh
-sed -i 's/name:en/name:ru/g' data/import/mapping.yaml
-```
-
-Generate data files
-```sh
-docker-compose run --rm osmnames
-```
-
-And take results
-```sh
-cp OSMNames/data/export/kaliningrad-latest_geonames.tsv place.tsv
-cp OSMNames/data/export/kaliningrad-latest_housenumbers.tsv address.tsv
-```
-
 ## Database
 
-Run Postgres
+Run PostgreSQL+PostGIS server
 ```sh
-docker run -d \
-    --name postgres-geocoding \
+docker run -it \
+    --name postgis \
     --publish 127.0.0.1:5432:5432 \
-    --volume $(pwd):/data \
-    --env POSTGRES_USER=pguser \
-    --env POSTGRES_PASSWORD=123 \
-    --env POSTGRES_DB=geoplaces \
-    postgres:10.3
+    --env 'POSTGRES_USER=postgres' \
+    --env 'POSTGRES_PASSWORD=postgres' \
+    --env 'POSTGRES_DB=geoplaces' \
+    tetafro/postgis:10-2.4
 ```
 
-Create tables structure and import data from tsv-files
+Install `hstore` extension
+```sh
+docker exec -it postgis psql -U postgres geoplaces \
+    -c 'CREATE EXTENSION hstore'
 ```
-docker exec -it postgres-geocoding psql -U pguser -h localhost geoplaces
-\i /data/scripts/init.sql
-\i /data/scripts/copy.sql
+
+## Prepare data
+
+Get map in PBF format
+```sh
+curl --output data/kaliningrad-latest.osm.pbf \
+    https://download.geofabrik.de/russia/kaliningrad-latest.osm.pbf
+```
+
+Import with [imposm](https://github.com/omniscale/imposm3) importer for
+[OpenStreetMap](https://www.openstreetmap.org/) data
+```sh
+imposm import \
+    -mapping ./data/mapping.yml \
+    -read ./data/kaliningrad-latest.osm.pbf \
+    -connection postgis://postgres:postgres@localhost:5432/geoplaces \
+    -overwritecache \
+    -write
+```
+
+Init DB table and copy raw data to it
+```sh
+docker exec -i postgis psql -U postgres -h localhost geoplaces < ./data/init.sql
+docker exec -i postgis psql -U postgres -h localhost geoplaces < ./data/copy.sql
+docker exec -i postgis psql -U postgres -h localhost geoplaces < ./data/clean.sql
 ```
 
 ## Run

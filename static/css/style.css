@@ -1,6 +1,5 @@
 body {
     padding: 25px 100px;
-
 }
 
 .block {
@@ -16,7 +15,7 @@ h2 {
 #search {
     font-size: 16px;
     padding: 5px;
-    width: calc(100% - 20px);
+    width: calc(100% - 24px);
 }
 
 div.option {

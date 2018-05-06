@@ -7,5 +7,5 @@
 # Current config
 config.env
 
-# Database dumps
-*.tsv
+# Map files
+*.pbf

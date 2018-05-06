@@ -26,15 +26,16 @@ function main() {
                     });
             },
             select: (event, ui) => {
+                console.log(ui.item)
                 // Put marker on map and center it
-                L.marker([ui.item.lat, ui.item.lon]).addTo(map);
+                L.marker([ui.item.coordinate.lat, ui.item.coordinate.lon]).addTo(map);
                 map.panTo([ui.item.lat, ui.item.lon]);
-                $input.val(ui.item.display_name);
+                $input.val(ui.item.name);
 
                 // Display object
                 $object.html('');
                 let line;
-                line = `<h4>${ui.item.display_name}</h4>`
+                line = `<h4>${ui.item.name}</h4>`
                 $('<div>').append(line).appendTo($object);
                 for (field in ui.item) {
                     line = `<p><b>${field}:</b> ${ui.item[field]}</p>`;
@@ -46,7 +47,7 @@ function main() {
         })
         .autocomplete('instance')._renderItem = function (ul, item) {
             return $('<li>')
-                .append(`<div class="option">${item.display_name}</div>`)
+                .append(`<div class="option">${item.name}</div>`)
                 .appendTo(ul);
         };
 }

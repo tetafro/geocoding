@@ -1,0 +1,57 @@
+tables:
+  point:
+    type: point
+    fields:
+      - name: osm_id
+        type: id
+      - name: geometry
+        type: geometry
+      - key: name
+        name: name
+        type: string
+      - key: name:ru
+        name: name_ru
+        type: string
+      - key: null
+        name: all_tags
+        type: hstore_tags
+    mapping:
+      __any__: [__any__]
+  linestring:
+    type: linestring
+    fields:
+      - name: osm_id
+        type: id
+      - name: geometry
+        type: geometry
+      - key: name
+        name: name
+        type: string
+      - key: name:ru
+        name: name_ru
+        type: string
+      - key: null
+        name: all_tags
+        type: hstore_tags
+    mapping:
+      __any__: [__any__]
+  polygon:
+    type: polygon
+    fields:
+      - name: osm_id
+        type: id
+      - name: geometry
+        type: geometry
+      - key: name
+        name: name
+        type: string
+      - key: name:ru
+        name: name_ru
+        type: string
+      - key: null
+        name: all_tags
+        type: hstore_tags
+    mapping:
+      __any__: [__any__]
+tags:
+load_all: true

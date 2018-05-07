@@ -34,5 +34,7 @@ func main() {
 	r := router.New(placesController)
 	addr := fmt.Sprintf(":%d", cfg.Port)
 	log.Infof("Start listening at %s", addr)
-	http.ListenAndServe(addr, r)
+	if err := http.ListenAndServe(addr, r); err != nil {
+		log.Errorf("Failed to start server: %v", err)
+	}
 }

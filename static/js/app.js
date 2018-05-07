@@ -18,16 +18,25 @@ function main() {
         .autocomplete({
             minLength: 3,
             source: function (request, response) {
-                $.getJSON(
-                    '/api/v1/places',
-                    {name: request.term},
-                    (resp) => {
+                $.ajax({
+                    dataType: 'json',
+                    url: '/api/v1/places',
+                    data: {fullname: request.term},
+                    success: (resp) => {
                         return response(resp.data);
-                    });
+                    },
+                    error: (resp) => {
+                        if (resp.responseJSON) {
+                            $object.html(resp.responseJSON.data.error);
+                            return
+                        }
+                        $object.html('<h4>Unexpected error</h4>');
+                    }
+                });
             },
             focus: (event, ui) => {
                 // Save value in the input
-                $input.val(ui.item.name);
+                $input.val(ui.item.fullname);
 
                 event.preventDefault();
             },
@@ -37,11 +46,11 @@ function main() {
                 map.panTo([ui.item.coordinate.lon, ui.item.coordinate.lat]);
 
                 // Save value in the input
-                $input.val(ui.item.name);
+                $input.val(ui.item.fullname);
 
                 // Display object
                 $object.html('');
-                let line = `<h4>${ui.item.name}</h4>`
+                let line = `<h4>${ui.item.fullname}</h4>`
                 $('<div>').append(line).appendTo($object);
                 for (field in ui.item) {
                     if (field == 'coordinate') {
@@ -57,7 +66,7 @@ function main() {
         })
         .autocomplete('instance')._renderItem = function (ul, item) {
             return $('<li>')
-                .append(`<div class="option">${item.name}</div>`)
+                .append(`<div class="option">${item.fullname}</div>`)
                 .appendTo(ul);
         };
 }

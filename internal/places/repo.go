@@ -6,13 +6,18 @@ import (
 	"strings"
 )
 
+const (
+	// Muximum number of places for one request.
+	placesLimit = 10
+)
+
 // Repo deals with places repository.
 type Repo interface {
-	GetByName(name string) ([]*Place, error)
+	GetByFullname(fullname string) ([]*Place, error)
 }
 
 type placeStmts struct {
-	selectByName *sql.Stmt
+	selectByFullname *sql.Stmt
 }
 
 // PostgresRepo is a repo implementation for working with PostgreSQL.
@@ -30,10 +35,10 @@ func NewPostgresRepo(db *sql.DB) (*PostgresRepo, error) {
 	return &PostgresRepo{db, stmts}, nil
 }
 
-// GetByName find places by name (or by part of name).
-func (r *PostgresRepo) GetByName(name string) ([]*Place, error) {
-	name = searchable(name)
-	rows, err := r.stmt.selectByName.Query(name)
+// GetByFullname find places by fullname (or by part of fullname).
+func (r *PostgresRepo) GetByFullname(fullname string) ([]*Place, error) {
+	fullname = searchable(fullname)
+	rows, err := r.stmt.selectByFullname.Query(fullname, placesLimit)
 	if err != nil {
 		return nil, fmt.Errorf("failed to make request: %v", err)
 	}
@@ -42,7 +47,12 @@ func (r *PostgresRepo) GetByName(name string) ([]*Place, error) {
 	places := []*Place{}
 	for rows.Next() {
 		p := &Place{Coordinate: &Point{}}
-		err = rows.Scan(&p.ID, &p.OSMID, &p.OSMType, &p.Name, &p.Coordinate.Lat, &p.Coordinate.Lon)
+		err = rows.Scan(
+			&p.ID, &p.OSMID, &p.OSMType, &p.Coordinate.Lat, &p.Coordinate.Lon,
+			&p.Priority,
+			&p.Name, &p.Country, &p.City, &p.Street, &p.Housenumber,
+			&p.Fullname,
+		)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan rows: %v", err)
 		}
@@ -57,14 +67,17 @@ func prepareStmt(db *sql.DB) (*placeStmts, error) {
 	stmts := &placeStmts{}
 	var err error
 
-	stmts.selectByName, err = db.Prepare(`
-		SELECT id, osm_id, osm_type, name, coordinate[0], coordinate[1]
+	stmts.selectByFullname, err = db.Prepare(`
+		SELECT id, osm_id, osm_type, coordinate[0], coordinate[1],
+			priority,
+			name, country, city, street, housenumber,
+			fullname
 		FROM place
 		WHERE tsv @@ to_tsquery($1)
-		LIMIT 10
+		LIMIT $2
 	`)
 	if err != nil {
-		return nil, fmt.Errorf("faied to prepare selectByName statement: %v", err)
+		return nil, fmt.Errorf("faied to prepare selectByFullname statement: %v", err)
 	}
 
 	return stmts, nil

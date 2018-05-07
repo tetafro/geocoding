@@ -22,13 +22,13 @@ func NewController(service *Service, log *logrus.Logger) *Controller {
 func (c *Controller) Get(w http.ResponseWriter, req *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	name := req.URL.Query().Get("name")
-	if len(name) < 3 {
-		api.Respond(w, http.StatusBadRequest, api.Error("Name is too short"))
+	fullname := req.URL.Query().Get("fullname")
+	if len(fullname) < 3 {
+		api.Respond(w, http.StatusBadRequest, api.Error("Fullname is too short"))
 		return
 	}
 
-	places, err := c.service.GetByName(name)
+	places, err := c.service.GetByFullname(fullname)
 	if err != nil {
 		c.log.Errorf("Failed to get places: %v", err)
 		api.RespondInternalServerError(w)

@@ -10,7 +10,7 @@ func NewService(repo Repo) *Service {
 	return &Service{repo}
 }
 
-// GetByName find places by name (or by part of name).
-func (s *Service) GetByName(name string) ([]*Place, error) {
-	return s.repo.GetByName(name)
+// GetByFullname find places by fullname (or by part of fullname).
+func (s *Service) GetByFullname(fullname string) ([]*Place, error) {
+	return s.repo.GetByFullname(fullname)
 }

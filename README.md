@@ -6,7 +6,7 @@ Search addresses and places.
 
 Run PostgreSQL+PostGIS server
 ```sh
-docker run -d --rm \
+docker run -d \
     --name postgis \
     --publish 127.0.0.1:5432:5432 \
     --env 'POSTGRES_USER=postgres' \

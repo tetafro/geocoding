@@ -8,9 +8,15 @@ type Point struct {
 
 // Place represents geographical place.
 type Place struct {
-	ID         *int    `json:"id"`
-	OSMID      *int    `json:"osm_id"`
-	OSMType    *string `json:"osm_type"`
-	Name       *string `json:"name"`
-	Coordinate *Point  `json:"coordinate"`
+	ID          *int    `json:"id"`
+	OSMID       *int    `json:"osm_id"`
+	OSMType     *string `json:"osm_type"`
+	Coordinate  *Point  `json:"coordinate"`
+	Priority    *int    `json:"priority"`
+	Name        *string `json:"name"`
+	Country     *string `json:"country"`
+	City        *string `json:"city"`
+	Street      *string `json:"street"`
+	Housenumber *string `json:"housenumber"`
+	Fullname    *string `json:"fullname"`
 }

@@ -25,20 +25,30 @@ function main() {
                         return response(resp.data);
                     });
             },
+            focus: (event, ui) => {
+                // Save value in the input
+                $input.val(ui.item.name);
+
+                event.preventDefault();
+            },
             select: (event, ui) => {
-                console.log(ui.item)
                 // Put marker on map and center it
-                L.marker([ui.item.coordinate.lat, ui.item.coordinate.lon]).addTo(map);
-                map.panTo([ui.item.lat, ui.item.lon]);
+                L.marker([ui.item.coordinate.lon, ui.item.coordinate.lat]).addTo(map);
+                map.panTo([ui.item.coordinate.lon, ui.item.coordinate.lat]);
+
+                // Save value in the input
                 $input.val(ui.item.name);
 
                 // Display object
                 $object.html('');
-                let line;
-                line = `<h4>${ui.item.name}</h4>`
+                let line = `<h4>${ui.item.name}</h4>`
                 $('<div>').append(line).appendTo($object);
                 for (field in ui.item) {
-                    line = `<p><b>${field}:</b> ${ui.item[field]}</p>`;
+                    if (field == 'coordinate') {
+                        line = `<p><b>${field}:</b> ${ui.item.coordinate.lat.toFixed(6)}, ${ui.item.coordinate.lon.toFixed(6)}</p>`;
+                    } else {
+                        line = `<p><b>${field}:</b> ${ui.item[field]}</p>`;
+                    }
                     $('<div>').append(line).appendTo($object);
                 }
 

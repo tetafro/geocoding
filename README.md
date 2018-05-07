@@ -6,7 +6,7 @@ Search addresses and places.
 
 Run PostgreSQL+PostGIS server
 ```sh
-docker run -it \
+docker run -d --rm \
     --name postgis \
     --publish 127.0.0.1:5432:5432 \
     --env 'POSTGRES_USER=postgres' \
@@ -25,16 +25,16 @@ docker exec -it postgis psql -U postgres geoplaces \
 
 Get map in PBF format
 ```sh
-curl --output data/kaliningrad-latest.osm.pbf \
-    https://download.geofabrik.de/russia/kaliningrad-latest.osm.pbf
+curl --output data/south-fed-district-latest.osm.pbf \
+    https://download.geofabrik.de/russia/south-fed-district-latest.osm.pbf
 ```
 
-Import with [imposm](https://github.com/omniscale/imposm3) importer for
+Use [imposm](https://github.com/omniscale/imposm3/releases) importer for
 [OpenStreetMap](https://www.openstreetmap.org/) data
 ```sh
 imposm import \
     -mapping ./data/mapping.yml \
-    -read ./data/kaliningrad-latest.osm.pbf \
+    -read ./data/south-fed-district-latest.osm.pbf \
     -connection postgis://postgres:postgres@localhost:5432/geoplaces \
     -overwritecache \
     -write
@@ -56,7 +56,7 @@ cp config.env.example config.env
 
 Build and run the app
 ```sh
-make build
+make dep build
 source config.env
 ./bin/geocoding
 ```

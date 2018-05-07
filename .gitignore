@@ -9,3 +9,6 @@ config.env
 
 # Map files
 *.pbf
+
+# Importer util
+/imposm/

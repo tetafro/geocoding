@@ -35,14 +35,16 @@ function main() {
                 });
             },
             focus: (event, ui) => {
-                // Save value in the input
+                // Show value in the input
                 $input.val(ui.item.fullname);
-
                 event.preventDefault();
             },
             select: (event, ui) => {
-                // Put marker on map and center it
-                L.marker([ui.item.coordinate.lon, ui.item.coordinate.lat]).addTo(map);
+                // Open popup on map and center it
+                L.popup()
+                    .setLatLng([ui.item.coordinate.lon, ui.item.coordinate.lat])
+                    .setContent(ui.item.fullname)
+                    .openOn(map);
                 map.panTo([ui.item.coordinate.lon, ui.item.coordinate.lat]);
 
                 // Save value in the input

@@ -12,7 +12,14 @@ h2 {
     font-family: sans-serif;
 }
 
+#map {
+    border: 1px #ccc solid;
+    height: 400px;
+    width: 100%;
+}
+
 #search {
+    display: inline-block;
     font-size: 16px;
     padding: 5px;
     width: calc(100% - 24px);
@@ -20,13 +27,6 @@ h2 {
 
 div.option {
     width: 570px;
-}
-
-#map {
-    display: inline-block;
-    border: 1px #ccc solid;
-    height: 400px;
-    width: 100%;
 }
 
 #object {

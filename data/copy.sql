@@ -1,12 +1,36 @@
+-- Delete unusable data
+DELETE FROM import.osm_point
+WHERE ST_IsEmpty(geometry) OR (
+    name = '' AND
+    name_ru = '' AND
+    city = '' AND
+    street = '' AND
+    housenumber = ''
+);
+DELETE FROM import.osm_linestring
+WHERE ST_IsEmpty(geometry) OR (
+    name = '' AND
+    name_ru = '' AND
+    city = '' AND
+    street = '' AND
+    housenumber = ''
+);
+DELETE FROM import.osm_polygon
+WHERE ST_IsEmpty(geometry) OR (
+    name = '' AND
+    name_ru = '' AND
+    city = '' AND
+    street = '' AND
+    housenumber = ''
+);
+
 -- Import point objects
 INSERT INTO place (
-    osm_id, osm_type, name,
-    country, city, street, housenumber,
-    coordinate
+    osm_id, country, city, street, housenumber, name, type, coordinate
 )
-SELECT osm_id, all_tags -> 'type',
-    COALESCE(NULLIF(name_ru, ''), name),
+SELECT osm_id,
     country, city, street, housenumber,
+    COALESCE(NULLIF(name_ru, ''), name),
     POINT(
         ST_X(ST_Transform(geometry, 4326)),
         ST_Y(ST_Transform(geometry, 4326))
@@ -15,53 +39,40 @@ FROM import.osm_point;
 
 -- Import linestring objects
 INSERT INTO place (
-    osm_id, osm_type, name,
-    country, city, street, housenumber,
-    coordinate
+    osm_id, country, city, street, housenumber, name, type, coordinate
 )
-SELECT osm_id, all_tags -> 'type',
-    COALESCE(NULLIF(name_ru, ''), name),
+SELECT osm_id,
     country, city, street, housenumber,
+    COALESCE(NULLIF(name_ru, ''), name),
     POINT(
         ST_X(ST_Transform(geometry, 4326)),
         ST_Y(ST_Transform(geometry, 4326))
     )
 FROM (
-    SELECT osm_id, all_tags, name, name_ru,
+    SELECT osm_id,
         country, city, street, housenumber,
+        name, name_ru,
+        all_tags,
         ST_Centroid(geometry) AS geometry
     FROM import.osm_linestring
 ) AS t;
 
 -- Import polygon objects
 INSERT INTO place (
-    osm_id, osm_type, name,
-    country, city, street, housenumber,
-    coordinate
+    osm_id, country, city, street, housenumber, name, type, coordinate
 )
-SELECT osm_id, all_tags -> 'type',
-    COALESCE(NULLIF(name_ru, ''), name),
+SELECT osm_id,
     country, city, street, housenumber,
+    COALESCE(NULLIF(name_ru, ''), name),
     POINT(
         ST_X(ST_Transform(geometry, 4326)),
         ST_Y(ST_Transform(geometry, 4326))
     )
 FROM (
-    SELECT osm_id, all_tags, name, name_ru,
+    SELECT osm_id,
         country, city, street, housenumber,
+        name, name_ru,
+        all_tags,
         ST_Centroid(geometry) AS geometry
     FROM import.osm_polygon
 ) AS t;
-
--- Assemble fullname
-UPDATE place
-SET fullname = CONCAT_WS(
-    ', ',
-    NULLIF(city, ''),
-    NULLIF(street, ''),
-    NULLIF(housenumber, ''),
-    NULLIF(name, '')
-);
-
--- Prepare data for full-text search
-UPDATE place SET tsv = to_tsvector(coalesce(fullname, ''));

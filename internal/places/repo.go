@@ -48,10 +48,10 @@ func (r *PostgresRepo) GetByFullname(fullname string) ([]*Place, error) {
 	for rows.Next() {
 		p := &Place{Coordinate: &Point{}}
 		err = rows.Scan(
-			&p.ID, &p.OSMID, &p.OSMType, &p.Coordinate.Lat, &p.Coordinate.Lon,
-			&p.Priority,
-			&p.Name, &p.Country, &p.City, &p.Street, &p.Housenumber,
+			&p.ID, &p.OSMID,
+			&p.Country, &p.City, &p.Street, &p.Housenumber, &p.Name,
 			&p.Fullname,
+			&p.Coordinate.Lat, &p.Coordinate.Lon,
 		)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan rows: %v", err)
@@ -68,12 +68,12 @@ func prepareStmt(db *sql.DB) (*placeStmts, error) {
 	var err error
 
 	stmts.selectByFullname, err = db.Prepare(`
-		SELECT id, osm_id, osm_type, coordinate[0], coordinate[1],
-			priority,
-			name, country, city, street, housenumber,
-			fullname
+		SELECT id, osm_id,
+			country, city, street, housenumber, name,
+			fullname,
+			coordinate[0], coordinate[1]
 		FROM place
-		WHERE tsv @@ to_tsquery($1)
+		WHERE tsv_fullname @@ to_tsquery($1)
 		LIMIT $2
 	`)
 	if err != nil {
